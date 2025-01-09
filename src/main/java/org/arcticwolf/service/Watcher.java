@@ -1,10 +1,15 @@
 package org.arcticwolf.service;
 
-public interface Watcher extends Runnable {
+public abstract class Watcher implements Runnable {
 
-    public void watch();
+    protected abstract void watch();
 
-    public String getWatchedResource();
+    protected abstract String getWatchedResource();
 
-    public void stopWatching();
+    protected abstract void stopWatching();
+
+    @Override
+    public void run() {
+        watch();
+    }
 }

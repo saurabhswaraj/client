@@ -1,5 +1,6 @@
 package org.arcticwolf.service.impl;
 
+import org.arcticwolf.service.Task;
 import org.arcticwolf.service.Watcher;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
-public class DirectoryWatcher implements Watcher {
+public class DirectoryWatcher extends Watcher {
     private final String path;
 
     public DirectoryWatcher(String path) {
@@ -21,48 +22,37 @@ public class DirectoryWatcher implements Watcher {
     private boolean shouldWatch = true;
 
     @Override
-    public void watch() {
+    protected void watch() {
 
         try(WatchService watchService = FileSystems.getDefault().newWatchService()) {
             Path directoryPath = Paths.get(path);
-            directoryPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
-                    StandardWatchEventKinds.ENTRY_DELETE,
-                    StandardWatchEventKinds.ENTRY_MODIFY);
+            directoryPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
             shouldWatch = true;
             while(shouldWatch) {
                 WatchKey watchKey = watchService.take();
                 for (WatchEvent<?> watchEvent : watchKey.pollEvents()) {
-
                     if (watchEvent.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
                         System.out.println("File created: " + watchEvent.context());
-                    }
-                    else if (watchEvent.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
-                        System.out.println("File deleted: " + watchEvent.context());
-                    }
-                    else if (watchEvent.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-                        System.out.println("File modified: " + watchEvent.context());
+                        Task task = new PropertiesFilter();
+                        String filePath = path + "/" + watchEvent.context();
+                        task.doWork(filePath);
                     }
                 }
                 watchKey.reset();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
         }
     }
 
     @Override
-    public String getWatchedResource() {
+    protected String getWatchedResource() {
         return path;
     }
 
     @Override
-    public void stopWatching() {
+    protected void stopWatching() {
         shouldWatch = false;
     }
 
-    @Override
-    public void run() {
-        watch();
-    }
 }
