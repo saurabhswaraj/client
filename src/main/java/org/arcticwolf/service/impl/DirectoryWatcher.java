@@ -34,8 +34,7 @@ public class DirectoryWatcher extends Watcher {
                     if (watchEvent.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
                         System.out.println("File created: " + watchEvent.context());
                         Task task = new PropertiesFilter();
-                        String filePath = path + "/" + watchEvent.context();
-                        task.doWork(filePath);
+                        task.doWork(path, watchEvent.context().toString());
                     }
                 }
                 watchKey.reset();
