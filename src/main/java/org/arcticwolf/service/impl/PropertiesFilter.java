@@ -50,6 +50,10 @@ public class PropertiesFilter implements Task {
 
         Map<String, String> properties = convertPropertiesToMap(prop);
         System.out.println(properties);
+        if(properties.isEmpty()) {
+            System.out.println("No properties found");
+            return;
+        }
 
         CreatePropertiesRequest createPropertiesRequest = new CreatePropertiesRequest();
         createPropertiesRequest.setProperties(properties);
